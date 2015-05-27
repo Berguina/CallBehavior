@@ -1,4 +1,5 @@
 // Copyright A.Putrino S.Chachkov
+// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
 #include "MyProject.h" //Replace this with your project
 #include "BTTask_CallBehavior.h"
