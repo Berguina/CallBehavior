@@ -1,6 +1,6 @@
 // Copyright A.Putrino S.Chachkov
 
-#include "Blabla.h" //<-- replace with your project .h, idem for logs
+#include "MyProject.h" // Replace with your project .h, idem for logs
 #include "MyAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeManager.h"
@@ -20,7 +20,7 @@ bool AMyAIController::RunBehaviorTree(UBehaviorTree* BTAsset)
 
 	if (BTAsset == NULL)
 	{
-		UE_LOG(LogBlabla, Warning, TEXT("RunBehaviorTree: Unable to run NULL behavior tree"));
+		UE_LOG(LogMyProject, Warning, TEXT("RunBehaviorTree: Unable to run NULL behavior tree"));
 		return false;
 	}
 
@@ -57,7 +57,7 @@ bool AMyAIController::MyUseBlackboard(UBlackboardData* BlackboardAsset)
 {
 	if (BlackboardAsset == NULL)
 	{
-		UE_LOG(LogBlabla, Log, TEXT("UseBlackboard: trying to use NULL Blackboard asset. Ignoring"));
+		UE_LOG(LogMyProject, Log, TEXT("UseBlackboard: trying to use NULL Blackboard asset. Ignoring"));
 		return false;
 	}
 
@@ -80,7 +80,7 @@ bool AMyAIController::MyUseBlackboard(UBlackboardData* BlackboardAsset)
 	}
 	else if (BlackboardComp->GetBlackboardAsset() != BlackboardAsset)
 	{
-		UE_LOG(LogBlabla, Log, TEXT("UseBlackboard: requested blackboard %s while already has %s instantiated. Forcing new BB.")
+		UE_LOG(LogMyProject, Log, TEXT("UseBlackboard: requested blackboard %s while already has %s instantiated. Forcing new BB.")
 			, *GetNameSafe(BlackboardAsset), *GetNameSafe(BlackboardComp->GetBlackboardAsset()));
 		InitializeBlackboard(*BlackboardComp, *BlackboardAsset);
 	}
