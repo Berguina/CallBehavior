@@ -1,6 +1,6 @@
 // Copyright A.Putrino S.Chachkov
 
-#include "CrazyRestaurant.h"
+#include "MyProject.h" //Replace this with your project
 #include "BTTask_CallBehavior.h"
 #include "MyBlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeManager.h"
