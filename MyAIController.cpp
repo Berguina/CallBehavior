@@ -1,4 +1,6 @@
 // Copyright A.Putrino S.Chachkov
+// Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
+
 
 #include "MyProject.h" // Replace with your project .h, idem for logs
 #include "MyAIController.h"
