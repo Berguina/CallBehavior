@@ -31,12 +31,12 @@ EBTNodeResult::Type UBTTask_CallBehavior::ExecuteTask(UBehaviorTreeComponent& Ow
 	UMyBlackboardComponent * MyBlackboard = Cast<UMyBlackboardComponent>(OwnerComp.GetBlackboardComponent());
 	if (MyBlackboard != NULL)
 	{
-
 		MyBlackboard->PushBlackboard(OriginalBlackboard, Params);
-
-
+		BehaviorAsset->BlackboardAsset = MyBlackboard->GetBlackboardAsset();
 	}
 
 	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
+	BehaviorAsset->BlackboardAsset = OriginalBlackboard;
+	
 	return Result;
 }
