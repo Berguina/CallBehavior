@@ -13,7 +13,7 @@
 *
 */
 UCLASS()
-class CRAZYRESTAURANT_API UBTTask_CallBehavior : public UBTTask_RunBehavior
+class  UBTTask_CallBehavior : public UBTTask_RunBehavior
 {
 	GENERATED_UCLASS_BODY()
 
