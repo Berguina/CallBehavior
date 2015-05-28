@@ -16,7 +16,7 @@ struct FMyKeyDelegate
 	FMyKeyDelegate(FBlackboard::FKey MyKeyID, FDelegateHandle MyDelegateHandle) :KeyID(MyKeyID), DelegateHandle(MyDelegateHandle){}
 };
 UCLASS()
-class CRAZYRESTAURANT_API UMyBlackboardComponent : public UBlackboardComponent
+class  UMyBlackboardComponent : public UBlackboardComponent
 {
 	GENERATED_BODY()
 
