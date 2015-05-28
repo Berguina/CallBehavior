@@ -11,7 +11,7 @@
  */
 
 UCLASS()
-class CRAZYRESTAURANT_API AMyAIController : public AAIController
+class  AMyAIController : public AAIController
 {
 	GENERATED_BODY()
 	
