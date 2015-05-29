@@ -1,7 +1,7 @@
 // Copyright A.Putrino S.Chachkov
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
-#include "MyProject.h" //Replace this with your project
+#include "CallBehaviorProj.h" //Replace this with your project
 #include "BTTask_CallBehavior.h"
 #include "MyBlackboardComponent.h"
 #include "BehaviorTree/BehaviorTreeManager.h"
@@ -31,12 +31,21 @@ EBTNodeResult::Type UBTTask_CallBehavior::ExecuteTask(UBehaviorTreeComponent& Ow
 	UMyBlackboardComponent * MyBlackboard = Cast<UMyBlackboardComponent>(OwnerComp.GetBlackboardComponent());
 	if (MyBlackboard != NULL)
 	{
+
+		//push blackboard on the stack
 		MyBlackboard->PushBlackboard(OriginalBlackboard, Params);
+
+		//temporarely replace original blackboard by the copy
+		//otherwise CacheSelectedKey willl not work properly
 		BehaviorAsset->BlackboardAsset = MyBlackboard->GetBlackboardAsset();
+
 	}
 
+	//execute RunBehavior
 	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
+
+	//put original BB of the behavior function back
 	BehaviorAsset->BlackboardAsset = OriginalBlackboard;
-	
+
 	return Result;
 }
