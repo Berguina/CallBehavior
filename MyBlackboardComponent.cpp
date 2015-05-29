@@ -1,7 +1,7 @@
 // Copyright A.Putrino S.Chachkov
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
-#include "MyProject.h" //Put here your project 
+#include "CallBehaviorProj.h" //Put here your project 
 #include "MyBlackboardComponent.h"
 #include "EngineUtils.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyAllTypes.h"
@@ -37,26 +37,33 @@ bool UMyBlackboardComponent::PushBlackboard(UBlackboardData* NewAsset, TArray<st
 		return false;
 	}
 
+	//makes a copy of the blackboard
+	//otherwise the data in the bb can be owerwritten by other calls or other instances
 	UBlackboardData* NewAssetCopy = CopyBlackboardData(NewAsset);
 
-	if (NewAssetCopy != NULL)
-	{
-	
-	}
-
-
+	//save current bb on stack
 	BBStack.Add(BlackboardAsset);
 	UBlackboardData* OldAsset = BlackboardAsset;
+
+	//and replace it by new bb
 	BlackboardAsset = NewAssetCopy;
 
-	bool bSuccess = true;
 
+
+	bool bSuccess = true;
+	const int32 NumKeys = NewAssetCopy->Keys.Num();
+
+	//make old bb parent of new bb
 	NewAssetCopy->Parent = OldAsset;
+	//update first key id accordingly
 	NewAssetCopy->UpdateKeyIDs();
 
+
 	TArray<FBlackboardInitializationData> InitList;
-	const int32 NumKeys = NewAssetCopy->Keys.Num();
+
 	InitList.Reserve(NumKeys);
+
+	//grow ValueOffsets to contain new bb offsets
 	ValueOffsets.AddZeroed(NumKeys);
 
 	for (int32 KeyIndex = 0; KeyIndex < NumKeys; KeyIndex++)
@@ -67,7 +74,7 @@ bool UMyBlackboardComponent::PushBlackboard(UBlackboardData* NewAsset, TArray<st
 		}
 	}
 
-
+	
 	// sort key values by memory size, so they can be packed better
 	// it still won't protect against structures, that are internally misaligned (-> uint8, uint32)
 	// but since all Engine level keys are good... 
@@ -79,6 +86,8 @@ bool UMyBlackboardComponent::PushBlackboard(UBlackboardData* NewAsset, TArray<st
 		MemoryOffset += InitList[Index].DataSize;
 	}
 
+	//grow ValueMemory to contain new bb data
+	//(also allows memory for parameters, this is not really neaded, to improve...)
 	ValueMemory.AddZeroed(MemoryOffset);
 
 	// initialize memory
@@ -89,18 +98,23 @@ bool UMyBlackboardComponent::PushBlackboard(UBlackboardData* NewAsset, TArray<st
 
 		KeyData->KeyType->Initialize(RawData);
 	}
+
 	int32 ParamIndex = 0;
 	for (int32 KeyIndex = 0; KeyIndex < NumKeys && ParamIndex<Params.Num(); KeyIndex++)
 	{
+		//for each parameter
 		if (NewAssetCopy->Keys[KeyIndex].KeyType&&NewAssetCopy->Keys[KeyIndex].EntryName.ToString().StartsWith("PARAM_"))
 		{
+
 			FBlackboard::FKey ParentKeyID = OldAsset->GetKeyID(Params[ParamIndex].SelectedKeyName);
 			FBlackboard::FKey ChildKeyID = BlackboardAsset->GetKeyID(BlackboardAsset->Keys[KeyIndex].EntryName);
 			if (ParentKeyID != FBlackboard::InvalidKey && ChildKeyID != FBlackboard::InvalidKey)
 			{
 
-	
+				//redirect ValueOffset to the memory location of the actual argument
 				ValueOffsets[ChildKeyID] = ValueOffsets[ParentKeyID];
+
+				//add observer to propagate notifications to actual argument observers
 				DelegateHandles.Add(FMyKeyDelegate(ChildKeyID, RegisterObserver(ChildKeyID, this, FOnBlackboardChange::CreateLambda([this, ParentKeyID](const UBlackboardComponent& BComp, FBlackboard::FKey ChangedKeyID){
 					this->CallNotifyObservers(ParentKeyID);
 				}))));
@@ -111,6 +125,8 @@ bool UMyBlackboardComponent::PushBlackboard(UBlackboardData* NewAsset, TArray<st
 		}
 
 	}
+
+	//saves number of parameters found
 	ParamsNumStack.Add(ParamIndex);
 
 	return bSuccess;
@@ -125,10 +141,13 @@ void UMyBlackboardComponent::CallNotifyObservers(FBlackboard::FKey KeyID)
 
 void UMyBlackboardComponent::PopBlackboard()
 {
+	//undoes PushBlackboard
+
 	int32 ParamsNum = ParamsNumStack[ParamsNumStack.Num() - 1];
 	ParamsNumStack.RemoveAt(ParamsNumStack.Num() - 1);
 	if (ParamsNum > 0)
 	{
+		//removes observers
 		for (int32 Index = DelegateHandles.Num() - ParamsNum; Index < DelegateHandles.Num(); Index++)
 		{
 			UnregisterObserver(DelegateHandles[Index].KeyID, DelegateHandles[Index].DelegateHandle);
@@ -137,15 +156,17 @@ void UMyBlackboardComponent::PopBlackboard()
 		DelegateHandles.RemoveAt(DelegateHandles.Num() - ParamsNum, ParamsNum);
 	}
 
-
+	//restores old bb
 	UBlackboardData* OldAsset = BlackboardAsset;
 	BlackboardAsset = BBStack[BBStack.Num() - 1];
 
 	BBStack.RemoveAt(BBStack.Num() - 1);
 
+	//shrinks ValueOffsets
 	const int32 NumKeys = OldAsset->Keys.Num();
 	ValueOffsets.RemoveAt(ValueOffsets.Num() - NumKeys, NumKeys);
 
+	//shrinks ValueMemory
 	uint16 MemoryOffset = 0;
 	for (int32 KeyIndex = 0; KeyIndex < NumKeys; KeyIndex++)
 	{
