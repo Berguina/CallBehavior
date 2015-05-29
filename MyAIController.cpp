@@ -2,7 +2,7 @@
 // Copyright 1998-2015 Epic Games, Inc. All Rights Reserved.
 
 
-#include "MyProject.h" // Replace with your project .h, idem for logs
+#include "CallBehaviorProj.h" // Replace with your project .h, idem for logs
 #include "MyAIController.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BehaviorTreeManager.h"
@@ -22,7 +22,7 @@ bool AMyAIController::RunBehaviorTree(UBehaviorTree* BTAsset)
 
 	if (BTAsset == NULL)
 	{
-		UE_LOG(LogMyProject, Warning, TEXT("RunBehaviorTree: Unable to run NULL behavior tree"));
+		UE_LOG(LogCallBehavior, Warning, TEXT("RunBehaviorTree: Unable to run NULL behavior tree"));
 		return false;
 	}
 
@@ -33,6 +33,7 @@ bool AMyAIController::RunBehaviorTree(UBehaviorTree* BTAsset)
 	UBlackboardComponent* BlackboardComp = NULL;
 	if (BTAsset->BlackboardAsset)
 	{
+		//this is the only change wrt the overriden method
 		bSuccess = MyUseBlackboard(BTAsset->BlackboardAsset);
 		BlackboardComp = FindComponentByClass<UBlackboardComponent>();
 	}
@@ -42,7 +43,6 @@ bool AMyAIController::RunBehaviorTree(UBehaviorTree* BTAsset)
 		UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(BrainComponent);
 		if (BTComp == NULL)
 		{
-			//UE_LOG(LogBlabla, Log, TEXT("RunBehaviorTree: spawning BehaviorTreeComponent.."));
 
 			BrainComponent = BTComp = ConstructObject<UBehaviorTreeComponent>(UBehaviorTreeComponent::StaticClass(), this, TEXT("BTComponent"));
 			BrainComponent->RegisterComponent();
@@ -59,7 +59,7 @@ bool AMyAIController::MyUseBlackboard(UBlackboardData* BlackboardAsset)
 {
 	if (BlackboardAsset == NULL)
 	{
-		UE_LOG(LogMyProject, Log, TEXT("UseBlackboard: trying to use NULL Blackboard asset. Ignoring"));
+		UE_LOG(LogCallBehavior, Log, TEXT("UseBlackboard: trying to use NULL Blackboard asset. Ignoring"));
 		return false;
 	}
 
@@ -68,6 +68,7 @@ bool AMyAIController::MyUseBlackboard(UBlackboardData* BlackboardAsset)
 
 	if (BlackboardComp == NULL)
 	{
+		//this is the only change wrt the original UseBlackboard method
 		BlackboardComp = ConstructObject<UMyBlackboardComponent>(UMyBlackboardComponent::StaticClass(), this, TEXT("BlackboardComponent"));
 		if (BlackboardComp != NULL)
 		{
@@ -82,7 +83,7 @@ bool AMyAIController::MyUseBlackboard(UBlackboardData* BlackboardAsset)
 	}
 	else if (BlackboardComp->GetBlackboardAsset() != BlackboardAsset)
 	{
-		UE_LOG(LogMyProject, Log, TEXT("UseBlackboard: requested blackboard %s while already has %s instantiated. Forcing new BB.")
+		UE_LOG(LogCallBehavior, Log, TEXT("UseBlackboard: requested blackboard %s while already has %s instantiated. Forcing new BB.")
 			, *GetNameSafe(BlackboardAsset), *GetNameSafe(BlackboardComp->GetBlackboardAsset()));
 		InitializeBlackboard(*BlackboardComp, *BlackboardAsset);
 	}
